@@ -10,4 +10,4 @@ public class HelloController {
     public String hello() {
         return "Falist API está rodando 🚀";
     }
-}
+}   
