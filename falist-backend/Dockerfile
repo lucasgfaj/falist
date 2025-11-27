@@ -1,12 +1,17 @@
-# Etapa 1: build do app
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+FROM python:3.11-slim
 
-# Etapa 2: imagem final
-FROM eclipse-temurin:21-jre
+# set workdir
 WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# instalando dependências do SO para psycopg2
+RUN apt-get update && apt-get install -y gcc libpq-dev --no-install-recommends \
+&& rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
